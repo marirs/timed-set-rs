@@ -24,17 +24,26 @@ where T: std::hash::Hash + Eq{
         }
         false
     }
+
+    pub fn iter(&self) -> Iter<'_, T>{
+        Iter{
+            set: self.set.iter().map(|(k, v)| (k, v)).collect()
+        }
+    }
 }
 
-impl<T> Iterator for TimedSet<T>
-where T: Copy + std::hash::Hash + Eq
-{
-    type Item = T;
+pub struct Iter<'a, T> {
+    set: std::collections::HashMap<&'a T, &'a std::time::SystemTime>,
+}
+
+impl<'a, T> Iterator for Iter<'a, T>
+where T: Copy + std::hash::Hash + Eq{
+    type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {
-        let keys: Vec<T> = self.set.keys().cloned().collect();
+        let keys: Vec<&T> = self.set.keys().cloned().collect();
         for k in keys{
             if let Some((v, t)) = self.set.remove_entry(&k){
-                if std::time::SystemTime::now() < t{
+                if std::time::SystemTime::now() < *t{
                     return Some(v);
                 }
             }
@@ -52,18 +61,18 @@ mod tests {
         ts.add("bbbbb");
         ts.add("ccccc");
         ts.add("ddddd");
-        println!("step1");
-        for s in ts{
+        println!("---- step1");
+        for s in ts.iter(){
             println!("{}", s);
         }
-        println!("step2");
-        let mut ts = super::TimedSet::new(std::time::Duration::from_secs(10));
-        ts.add("aaaaa");
-        ts.add("bbbbb");
-        ts.add("ccccc");
-        ts.add("ddddd");
-        std::thread::sleep(std::time::Duration::from_secs(10));
-        for s in ts{
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        println!("---- step2");
+        for s in ts.iter(){
+            println!("{}", s);
+        }
+        println!("---- step3");
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        for s in ts.iter(){
             println!("{}", s);
         }
     }

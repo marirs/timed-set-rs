@@ -1,7 +1,7 @@
 [package]
 name = "timed_set"
 version = "0.0.1"
-description = "A timed set in Rust to store values for a given time period."
+description = "A simple timed set in Rust to store elements for a given time period."
 authors = ["Marirs <marirs@gmail.com>"]
 edition = "2021"
 

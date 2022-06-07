@@ -25,7 +25,8 @@ impl<T> TimedSet<T>
 where
     T: std::hash::Hash + Eq,
 {
-    /// Create a new TimedSet with a TTL of its elements
+    /// Create a new TimedSet. When adding elements into it, add with a custom ttl
+    /// for the element to expire. Every individual elements can have different ttl's
     /// ## Example
     /// ```rust
     /// use timed_set::TimedSet;
@@ -41,7 +42,8 @@ where
         }
     }
 
-    /// Create a new TimedSet with a TTL of its elements
+    /// Create a new TimedSet with a TTL of its elements. Here all the elements added into
+    /// this TimedSet will inherit the TTL specified while initiating the TimedSet.
     /// ## Example
     /// ```rust
     /// use timed_set::TimedSet;

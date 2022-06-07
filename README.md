@@ -20,7 +20,7 @@ use timed_set::TimedSet;
 use std::{time::Duration, thread::sleep};
 
 fn main() {
-    let mut ts = TimedSet::new(Duration::from_secs(3));
+    let mut ts = TimedSet::new_with_ttl(Duration::from_secs(3));
     ts.add("element_1");
     assert!(ts.contains(&"element_1"));
     sleep(Duration::from_secs(3));

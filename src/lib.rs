@@ -3,6 +3,19 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+/// A TimedSet that keeps a TTL for each of its elements.
+/// After the time expires, the elements are removed.
+/// ## Example
+/// ```rust
+/// use timed_set::TimedSet;
+/// use std::{time::Duration, thread::sleep};
+///
+/// let mut ts = TimedSet::new(Duration::from_secs(3));
+/// ts.add("element_1");
+/// assert!(ts.contains(&"element_1"));
+/// sleep(Duration::from_secs(3));
+/// assert!(!ts.contains(&"element_1"));
+/// ```
 pub struct TimedSet<T> {
     ttl: Duration,
     set: HashMap<T, SystemTime>,
@@ -12,6 +25,15 @@ impl<T> TimedSet<T>
 where
     T: std::hash::Hash + Eq,
 {
+    /// Create a new TimedSet with a TTL of its elements
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts: TimedSet<&str> = TimedSet::new(Duration::from_secs(10));
+    ///
+    /// ```
     pub fn new(ttl: Duration) -> Self {
         Self {
             ttl,
@@ -19,10 +41,29 @@ where
         }
     }
 
+    /// Add/Insert an element into the timed set
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts = TimedSet::new(Duration::from_secs(10));
+    /// ts.add("element1");
+    /// ```
     pub fn add(&mut self, val: T) {
         self.set.insert(val, SystemTime::now() + self.ttl);
     }
 
+    /// Check if an element is present in the TimedSet
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts = TimedSet::new(Duration::from_secs(10));
+    /// ts.add("element1");
+    /// assert!(ts.contains(&"element1"));
+    /// ```
     pub fn contains(&self, val: &T) -> bool {
         if let Some(s) = self.set.get(val) {
             if SystemTime::now() < *s {
@@ -32,6 +73,7 @@ where
         false
     }
 
+    /// Iterator
     pub fn iter(&self) -> Iter<'_, T> {
         Iter {
             set: self.set.iter().map(|(k, v)| (k, v)).collect(),
@@ -39,6 +81,7 @@ where
     }
 }
 
+/// Iterator
 pub struct Iter<'a, T> {
     set: HashMap<&'a T, &'a SystemTime>,
 }
@@ -66,24 +109,46 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_timedset() {
+    fn test_timedset_str() {
         // Create the Timed set with a TTL of 10 seconds
         let mut ts = TimedSet::new(Duration::from_secs(10));
         // add elements into the map
-        ts.add("test1");
-        ts.add("test2");
+        ts.add("element_1");
+        ts.add("element_2");
         // check if the elements are present
-        assert!(ts.contains(&"test1"));
-        assert!(ts.contains(&"test2"));
+        assert!(ts.contains(&"element_1"));
+        assert!(ts.contains(&"element_2"));
         // wait for 5 seconds
         std::thread::sleep(Duration::from_secs(5));
         // check if elements are present
-        assert!(ts.contains(&"test1"));
-        assert!(ts.contains(&"test2"));
+        assert!(ts.contains(&"element_1"));
+        assert!(ts.contains(&"element_2"));
         // wait for another 5 seconds
         std::thread::sleep(Duration::from_secs(5));
         // check if elements are not present now, as they should have got expired
-        assert!(!ts.contains(&"test1"));
-        assert!(!ts.contains(&"test2"));
+        assert!(!ts.contains(&"element_1"));
+        assert!(!ts.contains(&"element_2"));
+    }
+
+    #[test]
+    fn test_timedset_string() {
+        // Create the Timed set with a TTL of 10 seconds
+        let mut ts = TimedSet::new(Duration::from_secs(10));
+        // add elements into the map
+        ts.add("element_1".to_string());
+        ts.add("element_2".to_string());
+        // check if the elements are present
+        assert!(ts.contains(&"element_1".to_string()));
+        assert!(ts.contains(&"element_2".to_string()));
+        // wait for 5 seconds
+        std::thread::sleep(Duration::from_secs(5));
+        // check if elements are present
+        assert!(ts.contains(&"element_1".to_string()));
+        assert!(ts.contains(&"element_2".to_string()));
+        // wait for another 5 seconds
+        std::thread::sleep(Duration::from_secs(5));
+        // check if elements are not present now, as they should have got expired
+        assert!(!ts.contains(&"element_1".to_string()));
+        assert!(!ts.contains(&"element_2".to_string()));
     }
 }

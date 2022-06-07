@@ -10,6 +10,7 @@ use std::{
 /// use timed_set::TimedSet;
 /// use std::{time::Duration, thread::sleep};
 ///
+<<<<<<< HEAD
 /// let mut ts = TimedSet::new_with_ttl(Duration::from_secs(1));
 /// ts.add("element_1");
 /// assert!(ts.contains(&"element_1"));

@@ -10,13 +10,14 @@ use std::{
 /// use timed_set::TimedSet;
 /// use std::{time::Duration, thread::sleep};
 ///
-/// let mut ts = TimedSet::new();
-/// ts.add("element_1", Duration::from_secs(1));
+/// let mut ts = TimedSet::new_with_ttl(Duration::from_secs(1));
+/// ts.add("element_1");
 /// assert!(ts.contains(&"element_1"));
 /// sleep(Duration::from_secs(1));
 /// assert!(!ts.contains(&"element_1"));
 /// ```
 pub struct TimedSet<T> {
+    ttl: Duration,
     set: HashMap<T, SystemTime>,
 }
 
@@ -28,12 +29,30 @@ where
     /// ## Example
     /// ```rust
     /// use timed_set::TimedSet;
+    /// use std::time::Duration;
     ///
     /// let mut ts: TimedSet<&str> = TimedSet::new();
     ///
     /// ```
     pub fn new() -> Self {
         Self {
+            ttl: Duration::from_secs(1),
+            set: HashMap::new(),
+        }
+    }
+
+    /// Create a new TimedSet with a TTL of its elements
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts: TimedSet<&str> = TimedSet::new_with_ttl(Duration::from_secs(2));
+    ///
+    /// ```
+    pub fn new_with_ttl(ttl: Duration) -> Self {
+        Self {
+            ttl,
             set: HashMap::new(),
         }
     }
@@ -45,9 +64,22 @@ where
     /// use std::time::Duration;
     ///
     /// let mut ts = TimedSet::new();
-    /// ts.add("element1", Duration::from_secs(2));
+    /// ts.add("element1");
     /// ```
-    pub fn add(&mut self, val: T, ttl: Duration) {
+    pub fn add(&mut self, val: T) {
+        self.set.insert(val, SystemTime::now() + self.ttl);
+    }
+
+    /// Add/Insert an element into the timed set
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts = TimedSet::new();
+    /// ts.add_with_ttl("element1", Duration::from_secs(1));
+    /// ```
+    pub fn add_with_ttl(&mut self, val: T, ttl: Duration) {
         self.set.insert(val, SystemTime::now() + ttl);
     }
 
@@ -58,7 +90,7 @@ where
     /// use std::time::Duration;
     ///
     /// let mut ts = TimedSet::new();
-    /// ts.add("element1", Duration::from_secs(2));
+    /// ts.add("element1");
     /// assert!(ts.contains(&"element1"));
     /// ```
     pub fn contains(&self, val: &T) -> bool {
@@ -108,10 +140,10 @@ mod tests {
     #[test]
     fn test_timedset_str() {
         // Create the Timed set with a TTL of 10 seconds
-        let mut ts = TimedSet::new();
+        let mut ts = TimedSet::new_with_ttl(Duration::from_secs(2));
         // add elements into the map
-        ts.add("element_1", Duration::from_secs(2));
-        ts.add("element_2", Duration::from_secs(4));
+        ts.add("element_1");
+        ts.add("element_2");
         // check if the elements are present
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
@@ -124,10 +156,6 @@ mod tests {
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are not present now, as they should have got expired
         assert!(!ts.contains(&"element_1"));
-        assert!(ts.contains(&"element_2"));
-        std::thread::sleep(Duration::from_secs(2));
-        // check if elements are not present now, as they should have got expired
-        assert!(!ts.contains(&"element_1"));
         assert!(!ts.contains(&"element_2"));
     }
 
@@ -136,8 +164,8 @@ mod tests {
         // Create the Timed set with a TTL of 10 seconds
         let mut ts = TimedSet::new();
         // add elements into the map
-        ts.add("element_1".to_string(), Duration::from_secs(2));
-        ts.add("element_2".to_string(), Duration::from_secs(4));
+        ts.add_with_ttl("element_1".to_string(), Duration::from_secs(2));
+        ts.add_with_ttl("element_2".to_string(), Duration::from_secs(4));
         // check if the elements are present
         assert!(ts.contains(&"element_1".to_string()));
         assert!(ts.contains(&"element_2".to_string()));

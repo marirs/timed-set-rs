@@ -1,49 +1,101 @@
-pub struct TimedSet<T>{
-    ttl: std::time::Duration,
-    set: std::collections::HashMap<T, std::time::SystemTime>
+use std::{
+    collections::HashMap,
+    time::{Duration, SystemTime},
+};
+
+/// A TimedSet that keeps a TTL for each of its elements.
+/// After the time expires, the elements are removed.
+/// ## Example
+/// ```rust
+/// use timed_set::TimedSet;
+/// use std::{time::Duration, thread::sleep};
+///
+/// let mut ts = TimedSet::new(Duration::from_secs(1));
+/// ts.add("element_1");
+/// assert!(ts.contains(&"element_1"));
+/// sleep(Duration::from_secs(1));
+/// assert!(!ts.contains(&"element_1"));
+/// ```
+pub struct TimedSet<T> {
+    ttl: Duration,
+    set: HashMap<T, SystemTime>,
 }
 
 impl<T> TimedSet<T>
-where T: std::hash::Hash + Eq{
-    pub fn new(ttl: std::time::Duration) -> Self{
-        Self{
+where
+    T: std::hash::Hash + Eq,
+{
+    /// Create a new TimedSet with a TTL of its elements
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts: TimedSet<&str> = TimedSet::new(Duration::from_secs(2));
+    ///
+    /// ```
+    pub fn new(ttl: Duration) -> Self {
+        Self {
             ttl,
-            set: std::collections::HashMap::new()
+            set: HashMap::new(),
         }
     }
 
-    pub fn add(&mut self, val: T){
-        self.set.insert(val, std::time::SystemTime::now()+self.ttl);
+    /// Add/Insert an element into the timed set
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts = TimedSet::new(Duration::from_secs(2));
+    /// ts.add("element1");
+    /// ```
+    pub fn add(&mut self, val: T) {
+        self.set.insert(val, SystemTime::now() + self.ttl);
     }
 
-    pub fn contains(&self, val: &T) -> bool{
-        if let Some(s) = self.set.get(val){
-            if std::time::SystemTime::now() < *s{
+    /// Check if an element is present in the TimedSet
+    /// ## Example
+    /// ```rust
+    /// use timed_set::TimedSet;
+    /// use std::time::Duration;
+    ///
+    /// let mut ts = TimedSet::new(Duration::from_secs(2));
+    /// ts.add("element1");
+    /// assert!(ts.contains(&"element1"));
+    /// ```
+    pub fn contains(&self, val: &T) -> bool {
+        if let Some(s) = self.set.get(val) {
+            if SystemTime::now() < *s {
                 return true;
             }
         }
         false
     }
 
-    pub fn iter(&self) -> Iter<'_, T>{
-        Iter{
-            set: self.set.iter().map(|(k, v)| (k, v)).collect()
+    /// Iterator
+    pub fn iter(&self) -> Iter<'_, T> {
+        Iter {
+            set: self.set.iter().map(|(k, v)| (k, v)).collect(),
         }
     }
 }
 
+/// Iterator
 pub struct Iter<'a, T> {
-    set: std::collections::HashMap<&'a T, &'a std::time::SystemTime>,
+    set: HashMap<&'a T, &'a SystemTime>,
 }
 
 impl<'a, T> Iterator for Iter<'a, T>
-where T: Copy + std::hash::Hash + Eq{
+where
+    T: Copy + std::hash::Hash + Eq,
+{
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {
         let keys: Vec<&T> = self.set.keys().cloned().collect();
-        for k in keys{
-            if let Some((v, t)) = self.set.remove_entry(&k){
-                if std::time::SystemTime::now() < *t{
+        for k in keys {
+            if let Some((v, t)) = self.set.remove_entry(&k) {
+                if SystemTime::now() < *t {
                     return Some(v);
                 }
             }
@@ -54,26 +106,49 @@ where T: Copy + std::hash::Hash + Eq{
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn test() {
-        let mut ts = super::TimedSet::new(std::time::Duration::from_secs(10));
-        ts.add("aaaaa");
-        ts.add("bbbbb");
-        ts.add("ccccc");
-        ts.add("ddddd");
-        println!("---- step1");
-        for s in ts.iter(){
-            println!("{}", s);
-        }
-        std::thread::sleep(std::time::Duration::from_secs(5));
-        println!("---- step2");
-        for s in ts.iter(){
-            println!("{}", s);
-        }
-        println!("---- step3");
-        std::thread::sleep(std::time::Duration::from_secs(5));
-        for s in ts.iter(){
-            println!("{}", s);
-        }
+    fn test_timedset_str() {
+        // Create the Timed set with a TTL of 10 seconds
+        let mut ts = TimedSet::new(Duration::from_secs(2));
+        // add elements into the map
+        ts.add("element_1");
+        ts.add("element_2");
+        // check if the elements are present
+        assert!(ts.contains(&"element_1"));
+        assert!(ts.contains(&"element_2"));
+        // wait for 5 seconds
+        std::thread::sleep(Duration::from_secs(1));
+        // check if elements are present
+        assert!(ts.contains(&"element_1"));
+        assert!(ts.contains(&"element_2"));
+        // wait for another 5 seconds
+        std::thread::sleep(Duration::from_secs(1));
+        // check if elements are not present now, as they should have got expired
+        assert!(!ts.contains(&"element_1"));
+        assert!(!ts.contains(&"element_2"));
+    }
+
+    #[test]
+    fn test_timedset_string() {
+        // Create the Timed set with a TTL of 10 seconds
+        let mut ts = TimedSet::new(Duration::from_secs(2));
+        // add elements into the map
+        ts.add("element_1".to_string());
+        ts.add("element_2".to_string());
+        // check if the elements are present
+        assert!(ts.contains(&"element_1".to_string()));
+        assert!(ts.contains(&"element_2".to_string()));
+        // wait for 5 seconds
+        std::thread::sleep(Duration::from_secs(1));
+        // check if elements are present
+        assert!(ts.contains(&"element_1".to_string()));
+        assert!(ts.contains(&"element_2".to_string()));
+        // wait for another 5 seconds
+        std::thread::sleep(Duration::from_secs(1));
+        // check if elements are not present now, as they should have got expired
+        assert!(!ts.contains(&"element_1".to_string()));
+        assert!(!ts.contains(&"element_2".to_string()));
     }
 }

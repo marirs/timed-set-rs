@@ -10,7 +10,7 @@ use std::{
 /// use timed_set::TimedSet;
 /// use std::{time::Duration, thread::sleep};
 ///
-/// let mut ts = TimedSet::new_with_ttl(Duration::from_secs(1));
+/// let mut ts = TimedSet::new(Duration::from_secs(1));
 /// ts.add("element_1");
 /// assert!(ts.contains(&"element_1"));
 /// sleep(Duration::from_secs(1));
@@ -25,23 +25,6 @@ impl<T> TimedSet<T>
 where
     T: std::hash::Hash + Eq,
 {
-    /// Create a new TimedSet. When adding elements into it, add with a custom ttl
-    /// for the element to expire. Every individual elements can have different ttl's
-    /// ## Example
-    /// ```rust
-    /// use timed_set::TimedSet;
-    /// use std::time::Duration;
-    ///
-    /// let mut ts: TimedSet<&str> = TimedSet::new();
-    ///
-    /// ```
-    pub fn new() -> Self {
-        Self {
-            ttl: Duration::from_secs(1),
-            set: HashMap::new(),
-        }
-    }
-
     /// Create a new TimedSet with a TTL of its elements. Here all the elements added into
     /// this TimedSet will inherit the TTL specified while initiating the TimedSet.
     /// ## Example
@@ -49,10 +32,10 @@ where
     /// use timed_set::TimedSet;
     /// use std::time::Duration;
     ///
-    /// let mut ts: TimedSet<&str> = TimedSet::new_with_ttl(Duration::from_secs(2));
+    /// let mut ts: TimedSet<&str> = TimedSet::new(Duration::from_secs(2));
     ///
     /// ```
-    pub fn new_with_ttl(ttl: Duration) -> Self {
+    pub fn new(ttl: Duration) -> Self {
         Self {
             ttl,
             set: HashMap::new(),
@@ -65,7 +48,7 @@ where
     /// use timed_set::TimedSet;
     /// use std::time::Duration;
     ///
-    /// let mut ts = TimedSet::new();
+    /// let mut ts = TimedSet::new(Duration::from_secs(2));
     /// ts.add("element1");
     /// ```
     pub fn add(&mut self, val: T) {
@@ -78,7 +61,7 @@ where
     /// use timed_set::TimedSet;
     /// use std::time::Duration;
     ///
-    /// let mut ts = TimedSet::new();
+    /// let mut ts = TimedSet::new(Duration::from_secs(2));
     /// ts.add_with_ttl("element1", Duration::from_secs(1));
     /// ```
     pub fn add_with_ttl(&mut self, val: T, ttl: Duration) {
@@ -91,7 +74,7 @@ where
     /// use timed_set::TimedSet;
     /// use std::time::Duration;
     ///
-    /// let mut ts = TimedSet::new();
+    /// let mut ts = TimedSet::new(Duration::from_secs(2));
     /// ts.add("element1");
     /// assert!(ts.contains(&"element1"));
     /// ```
@@ -142,7 +125,7 @@ mod tests {
     #[test]
     fn test_timedset_with_ttl_str() {
         // Create the Timed set with a TTL of 2 seconds
-        let mut ts = TimedSet::new_with_ttl(Duration::from_secs(2));
+        let mut ts = TimedSet::new(Duration::from_secs(2));
         // add elements into the map
         ts.add("element_1");
         ts.add("element_2");
@@ -164,7 +147,7 @@ mod tests {
     #[test]
     fn test_timedset_with_ttl_string() {
         // Create the Timed set with a TTL of 2 seconds
-        let mut ts = TimedSet::new_with_ttl(Duration::from_secs(2));
+        let mut ts = TimedSet::new(Duration::from_secs(2));
         // add elements into the map
         ts.add("element_1".to_string());
         ts.add("element_2".to_string());
@@ -186,7 +169,7 @@ mod tests {
     #[test]
     fn test_timedset_str() {
         // Create the Timed set
-        let mut ts = TimedSet::new();
+        let mut ts = TimedSet::new(Duration::from_secs(0));
         // add elements into the map with a ttl for the same
         ts.add_with_ttl("element_1", Duration::from_secs(2));
         ts.add_with_ttl("element_2", Duration::from_secs(3));
@@ -207,5 +190,30 @@ mod tests {
         // check if elements are not present now, as they should have got expired
         assert!(!ts.contains(&"element_1"));
         assert!(!ts.contains(&"element_2"));
+    }
+
+    #[test]
+    fn test_timedset_mix() {
+        // create a timed set with default 10 seconds ttl
+        let mut ts = TimedSet::new(Duration::from_secs(2));
+        // add element
+        ts.add("element_1");
+        // add element with a custom ttl
+        ts.add_with_ttl("element_2", Duration::from_secs(3));
+        // check to see if elements are there
+        assert!(ts.contains(&"element_1"));
+        assert!(ts.contains(&"element_2"));
+        // wait for 1 second
+        std::thread::sleep(Duration::from_secs(1));
+        assert!(ts.contains(&"element_1"));
+        assert!(ts.contains(&"element_2"));
+        // wait for another second;
+        std::thread::sleep(Duration::from_secs(1));
+        assert!(!ts.contains(&"element_1"));    // should not be there as it expired
+        assert!(ts.contains(&"element_2"));     // continues to be there as its with custom ttl
+        // wait for 1 second
+        std::thread::sleep(Duration::from_secs(1));
+        assert!(!ts.contains(&"element_1"));    // expired
+        assert!(!ts.contains(&"element_2"));     // expired
     }
 }

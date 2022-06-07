@@ -2,7 +2,7 @@
 name = "timed_set"
 version = "0.0.2"
 description = "A simple timed set in Rust to store elements for a given time period."
-authors = ["Marirs <marirs@gmail.com>"]
+authors = ["Marirs <marirs@gmail.com>", "Andrey Mnatsakanov <andrey@3ig.kiev.ua>"]
 keywords = ["timed", "set", "ttl"]
 readme = "README.md"
 license-file = "LICENSE"

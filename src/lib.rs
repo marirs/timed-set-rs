@@ -132,11 +132,13 @@ mod tests {
         // check if the elements are present
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
         // wait for 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are present
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
         // wait for another 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are not present now, as they should have got expired
@@ -154,11 +156,13 @@ mod tests {
         // check if the elements are present
         assert!(ts.contains(&"element_1".to_string()));
         assert!(ts.contains(&"element_2".to_string()));
+
         // wait for 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are present
         assert!(ts.contains(&"element_1".to_string()));
         assert!(ts.contains(&"element_2".to_string()));
+
         // wait for another 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are not present now, as they should have got expired
@@ -176,16 +180,20 @@ mod tests {
         // check if the elements are present
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
         // wait for 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are present
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
         // wait for another 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are not present now, as they should have got expired
         assert!(!ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
+        // wait for another 1 seconds
         std::thread::sleep(Duration::from_secs(1));
         // check if elements are not present now, as they should have got expired
         assert!(!ts.contains(&"element_1"));
@@ -203,17 +211,20 @@ mod tests {
         // check to see if elements are there
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
         // wait for 1 second
         std::thread::sleep(Duration::from_secs(1));
         assert!(ts.contains(&"element_1"));
         assert!(ts.contains(&"element_2"));
+
         // wait for another second;
         std::thread::sleep(Duration::from_secs(1));
-        assert!(!ts.contains(&"element_1"));    // should not be there as it expired
-        assert!(ts.contains(&"element_2"));     // continues to be there as its with custom ttl
+        assert!(!ts.contains(&"element_1")); // should not be there as it expired
+        assert!(ts.contains(&"element_2")); // continues to be there as its with custom ttl
+
         // wait for 1 second
         std::thread::sleep(Duration::from_secs(1));
-        assert!(!ts.contains(&"element_1"));    // expired
-        assert!(!ts.contains(&"element_2"));     // expired
+        assert!(!ts.contains(&"element_1")); // expired
+        assert!(!ts.contains(&"element_2")); // expired
     }
 }

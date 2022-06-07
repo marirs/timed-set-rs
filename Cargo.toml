@@ -1,11 +1,13 @@
 [package]
 name = "timed_set"
-version = "0.0.1"
+version = "0.0.2"
 description = "A simple timed set in Rust to store elements for a given time period."
 authors = ["Marirs <marirs@gmail.com>"]
 keywords = ["timed", "set", "ttl"]
 readme = "README.md"
 license-file = "LICENSE"
+repository = "https://github.com/marirs/timed-set-rs"
+homepage = "https://github.com/marirs/timed-set-rs"
 edition = "2021"
 
 [profile.release]

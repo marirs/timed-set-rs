@@ -10,7 +10,7 @@ A simple timed set in Rust to store elements for a given time period.
 
 ```toml
 [dependencies]
-timed_set = "0.0.1"
+timed_set = "0.0.3"
 ```
 
 ### Example

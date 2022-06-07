@@ -1,4 +1,8 @@
 # Timed Set
+[![Linux Arm7](https://github.com/marirs/timed-set-rs/actions/workflows/linux_arm.yml/badge.svg)](https://github.com/marirs/timed-set-rs/actions/workflows/linux_arm.yml)
+[![Linux x86_64](https://github.com/marirs/timed-set-rs/actions/workflows/linux_intel.yml/badge.svg)](https://github.com/marirs/timed-set-rs/actions/workflows/linux_intel.yml)
+[![macOS intel](https://github.com/marirs/timed-set-rs/actions/workflows/macos_intel.yml/badge.svg)](https://github.com/marirs/timed-set-rs/actions/workflows/macos_intel.yml)
+[![Windows](https://github.com/marirs/timed-set-rs/actions/workflows/win_intel.yml/badge.svg)](https://github.com/marirs/timed-set-rs/actions/workflows/win_intel.yml)
 
 A simple timed set in Rust to store elements for a given time period.
 

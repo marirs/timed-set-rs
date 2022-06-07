@@ -3,6 +3,8 @@ name = "timed_set"
 version = "0.0.1"
 description = "A simple timed set in Rust to store elements for a given time period."
 authors = ["Marirs <marirs@gmail.com>"]
+readme = "README.md"
+
 edition = "2021"
 
 [profile.release]

@@ -49,5 +49,30 @@ fn main() {
 }
 ```
 
+Using it with lazy_static
+```rust
+use timed_set::TimedSet;
+use std::{time::Duration, thread::sleep, sync::Mutex};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref TS: Mutex<TimedSet<String>> = Mutex::new(TimedSet::new(Duration::from_secs(3)));
+}
+
+fn main() {
+    TS.lock().unwrap().add("element_1".to_string());
+    TS.lock().unwrap().add("element_2".to_string(), Duration::from_secs(10));   // element with custom ttl
+    assert!(TS.lock().unwrap().contains(&"element_1".to_string()));
+    assert!(TS.lock().unwrap().contains(&"element_2".to_string()));
+    
+    sleep(Duration::from_secs(3));
+    assert!(!TS.lock().unwrap().contains(&"element_1".to_string()));    // expired
+    assert!(TS.lock().unwrap().contains(&"element_2".to_string()));
+    
+    sleep(Duration::from_secs(8));
+    assert!(!TS.lock().unwrap().contains(&"element_2".to_string()));    // expired
+}
+```
+
 ---
 License: MIT
